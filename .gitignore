@@ -1,2 +1,4 @@
 node_modules
 app.yaml
+google-cloud-key.json
+.env

@@ -1,11 +1,11 @@
 const Sequelize = require('sequelize')
-const { DB_NAME, DATABASE_HOST, DB_URL } = require("./config")
+const {  DB_URL } = require("./config")
 const { Umzug, SequelizeStorage } = require('umzug')
 
 
 const sequelize = new Sequelize('truemates', 'tester', 'carlostruemates', {
     dialect: 'postgres',
-    host: '34.27.105.152',
+    host: DB_URL,
 })
 //const sequelize = new Sequelize(DB_URL)
 

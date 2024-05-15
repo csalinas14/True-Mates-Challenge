@@ -30,7 +30,7 @@ const createPost = async (req, res) => {
     blobStream.on("finish", async (data) => {
       //Create URL for direct file access via HTTP
       const publicUrl = format(
-        `http://storage.google.apis.com/${bucket.name}/${blob.name}`
+        `http://storage.googleapis.com/${bucket.name}/${blob.name}`
       )
 
       try{

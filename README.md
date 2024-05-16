@@ -4,11 +4,19 @@
 
 1. In order to add an attribute to posts when created I first had to change the Post model to include an attribute column with string type. Then I created a new migration that adds the attribute column to the posts table.  I included attribute as part of the response body for the post creation request with error handling if not included. In order to consider prior posts to this change, I added a default value for those rows.
 
+![Attribute](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/9da0f6c2-4107-4a96-9ba3-e7c5b4a127d6)
+
 2. The first step was to create a new get request for the post router that will return a post by id. I handled errors if the post is not found with the id and if the id is not the right type. I had already included timestamps when creating Posts by utilzing sequelize and found the time difference in milliseconds by utilzing Date object. I found the conversions for all the different types of times and used conditionals to determine which one would be the most appropiate.
+
+![Time Diff](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/2eccf5dc-0b45-4ac8-b0d0-8a17ef26d6e4)
 
 3. To start out, I had to reconsider my database setup because I had the photo url as a column in Post table. To incorporate more photos I thought it would be best to create a new table for photos where they would have a one to many relationship with posts, through postId. When the new table was set I had to alter the post creation request. To consider files with the same name I decided to add a pre-tag to the filename with something like 'user-1' to represent a user with id 1 which made every url unique.  I had to adjust multer to account for multiple files and looped through each file to create a writing stream for each one. I grouped each writing stream into an array of promises and waited for all of them to execute. Part of this process included creating a new Photo in the table with the necessary url and postId. The new Post now does not include information in the photo column and I changed the column to include nulls as part of the migration. We will keep the column until we transfer data from previous posts to the new Photo table. Posts did not require photos and posts without photos do not create any entries in the photos table. Lastly, we accounted for errors like too many files being passed with multer.
 
+![Mult Photos](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/125884ac-81c7-470a-a36e-1bcc25fcc4b3)
+
 4. Created a new route and controller for modifying a post. With a PUT request, we passed a necessary description to the body and a post id to params. We check for errors by making sure there is a description, the id finds a Post, or the id is the incorrect type.
+
+![Change Des](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/8116c234-9bad-41c9-abaf-b464413644bc)
 
 ## Requirement 1
 

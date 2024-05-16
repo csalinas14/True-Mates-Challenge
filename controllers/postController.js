@@ -3,7 +3,7 @@ const { format } = require("util")
 const { Storage } = require("@google-cloud/storage")
 const Post = require("../models/post")
 const Photo = require("../models/photo")
-const {once} = require('events')
+
 
 const storage = new Storage({ keyFilename: "google-cloud-key.json"})
 const bucket = storage.bucket("true-mates-bucket")
@@ -88,49 +88,6 @@ const createPost = async (req, res) => {
     post: post,
     photos: photoArray
   })
-    /*
-    //new filename to make sure users who have the same file name create different urls
-    const newFileName = 'user-' + req.user.id.toString() + '_' + req.file.originalname
-    
-    //Create a new blob in the bucket and upload the file data
-    const blob = bucket.file(newFileName)
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-    })
-
-    blobStream.on("error", (err) => {
-      res.status(500).send({ message: err.message })
-    })
-
-    blobStream.on("finish", async (data) => {
-      //Create URL for direct file access via HTTP
-      const publicUrl = format(
-        `http://storage.googleapis.com/${bucket.name}/${blob.name}`
-      )
-
-      try{
-        //Make the file public
-        await bucket.file(newFileName).makePublic()
-      } catch(error) {
-        console.log(error)
-        return res.status(500).send({
-          message: `Uploaded the file successfully: ${newFileName}, but public access denied!`,
-          url: publicUrl
-        })
-      }
-
-      //console.log(req.user)
-      const post = await Post.create({description: req.body.description, photo: publicUrl, userId: req.user.id, attribute: req.body.attribute})
-
-      res.status(200).send({
-        message: "Created post and uploaded the file successfully: " + newFileName,
-        post: post
-      })
-    })
-
-    blobStream.end(req.file.buffer)
-    */
-
     
   } catch(error) {
     //console.log(error)

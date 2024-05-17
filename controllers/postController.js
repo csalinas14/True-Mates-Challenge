@@ -95,6 +95,13 @@ const createPost = async (req, res) => {
         message: "Too many files. Only 5 allowed."
       })
     }
+
+    if(error.code === 'LIMIT_FILE_SIZE'){
+      return res.status(400).send({
+        message: "One of your files was too large."
+      })
+    }
+    
     res.status(500).send({
       message: `Could not upload the files. ${error}`
     })
@@ -139,7 +146,13 @@ const getPost = async(req, res) => {
       timeDiffToInclude = Math.floor(diff_in_years).toString() + 'yr ago'
     }
 
-    res.status(200).send({post: post, created_ago: timeDiffToInclude})
+    const photos = await Photo.findAll({
+      where: {
+        post_id: req.params.id
+      }
+    })
+
+    res.status(200).send({post: post, created_ago: timeDiffToInclude,  photos: photos})
   }catch(error){
     res.status(400).send({
       message: 'Incorrect id'
@@ -160,8 +173,21 @@ const changePost = async (req, res) => {
     
     post.description = req.body.description
     await post.save()
-    res.status(200).send(post)
+
+    const photos = await Photo.findAll({
+      where: {
+        post_id: req.params.id
+      }
+    })
+    
+    res.status(200).send({...post.dataValues, photos: photos})
   } catch(error){
+    if(error.name === 'SequelizeDatabaseError'){
+      return res.status(400).send({
+        message: 'Incorrect format for post id'
+      })
+    }
+    
     res.status(400).send({
       message: 'Incorrect id'
     })

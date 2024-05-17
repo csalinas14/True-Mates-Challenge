@@ -6,6 +6,7 @@
 In order to add an attribute to posts when created I first had to change the Post model to include an attribute column with string type. Then I created a new migration that adds the attribute column to the posts table.  I included attribute as part of the body for the post creation request with error handling if not included. In order to consider prior posts to this change, I added a default value for those rows.
 
 Here is an example of a post with the attribute included.
+
 ![Attribute](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/9da0f6c2-4107-4a96-9ba3-e7c5b4a127d6)
 
 Here is an example of an older post that incorporates the default value.

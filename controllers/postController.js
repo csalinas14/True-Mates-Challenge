@@ -23,7 +23,6 @@ const createPost = async (req, res) => {
       return res.status(400).send({ message: "Please provide an attribute!"})
     }
 
-    console.log(req.files.length)
     let photoArray = []
     let counter = 0
     let promises = []
@@ -184,6 +183,9 @@ const getPaginationPosts = async (req, res) => {
     let pageOffset = limit*offset
 
     const query = await Post.findAndCountAll({
+      order: [
+        ['id', 'ASC']
+      ],
       limit: limit,
       offset: pageOffset
     })

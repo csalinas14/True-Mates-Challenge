@@ -38,6 +38,8 @@ const addFriend = async (req, res) => {
         const friendInfo = await User.findByPk(friend)
 
         return res.status(200).send({
+            user_id: userId,
+            friend_id: friend,
             message: `User ${req.user.name} send a friend request to: ${friendInfo.name}`
         })
     }
@@ -62,6 +64,8 @@ const addFriend = async (req, res) => {
             await friendRequest2.save()
 
             return res.status(200).send({
+                user_id: userId,
+                friend_id: friend,
                 message: `User ${req.user.name} is now friends with ${friendInfo.name}`
             })
         }

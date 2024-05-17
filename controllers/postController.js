@@ -166,6 +166,9 @@ const changePost = async (req, res) => {
     if(!post) {
       return res.status(400).send({ message: "Post not found"})
     }
+    if(post.user_id !== req.user.id){
+      return res.status(400).send({ message: "Not the right user!"})
+    }
     //console.log(req.body)
     if(!req.body.description) {
       return res.status(400).send({ message: "Please include new description!"})

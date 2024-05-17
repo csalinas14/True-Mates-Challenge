@@ -70,16 +70,16 @@ const createPost = async (req, res) => {
             }
             
             const photo = await Photo.create({postId: post.id, url: publicUrl})
-            //console.log(photo)
+            
             photoArray.push(photo)
-            //console.log(photoArray)
+            
             resolve()
           
         })
         })
       )
       
-    //blobStream.end(fil.buffer)
+    
   })
   await Promise.all(promises)
 
@@ -89,7 +89,7 @@ const createPost = async (req, res) => {
   })
     
   } catch(error) {
-    console.log(error)
+    //console.log(error)
     if(error.code === 'LIMIT_UNEXPECTED_FILE'){
       return res.status(400).send({
         message: "Too many files. Only 5 allowed."
@@ -165,6 +165,9 @@ const changePost = async (req, res) => {
     const post = await Post.findByPk(req.params.id)
     if(!post) {
       return res.status(400).send({ message: "Post not found"})
+    }
+    if(post.user_id !== req.user.id){
+      return res.status(400).send({ message: "Not the right user!"})
     }
     //console.log(req.body)
     if(!req.body.description) {

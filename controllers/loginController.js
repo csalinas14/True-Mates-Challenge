@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const bcrypt = require("bcrypt")
+const { SECRET } = require("../utils/config")
 
 const login = async (req, res) => {
   try{
@@ -24,8 +25,7 @@ const login = async (req, res) => {
       id: user.id
     }
 
-    //better to place secret in .env in actual production
-    const token = jwt.sign(userForToken, 'secret')
+    const token = jwt.sign(userForToken, SECRET)
     const loginUser = {
       token,
       name: user.name,

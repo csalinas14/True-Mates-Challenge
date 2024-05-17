@@ -1,10 +1,18 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const bcrypt = require("bcrypt")
+const { SECRET } = require("../utils/config")
 
 const login = async (req, res) => {
   try{
     const { password, email } = req.body
+
+    if(!password || !email){
+      return res.status(400).json({
+        error: 'Please provide email and password'
+      })
+    }
+
     const user = await User.findOne({
       where: {
         email: email
@@ -24,8 +32,7 @@ const login = async (req, res) => {
       id: user.id
     }
 
-    //better to place secret in .env in actual production
-    const token = jwt.sign(userForToken, 'secret')
+    const token = jwt.sign(userForToken, SECRET)
     const loginUser = {
       token,
       name: user.name,
@@ -33,7 +40,7 @@ const login = async (req, res) => {
     }
     res.status(200).send(loginUser)
   } catch(error){
-    res.status(400).json({error: error.message})
+    res.status(500).json({error: error.message})
   }
 }
 

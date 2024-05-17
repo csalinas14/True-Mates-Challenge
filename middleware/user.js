@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const { SECRET } = require("../utils/config")
 
 const tokenExtractor = (req, res, next) => {
   //console.log(req)
@@ -12,7 +13,7 @@ const tokenExtractor = (req, res, next) => {
 const userExtractor = (req, res, next) => {
   //console.log(req.token)
   try{
-  const decodedToken = jwt.verify(req.token, 'secret')
+  const decodedToken = jwt.verify(req.token, SECRET)
   if(!decodedToken.id){
     res.status(401).json({ error: 'token invalid'})
   }

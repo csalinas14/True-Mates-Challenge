@@ -43,8 +43,8 @@ const addFriend = async (req, res) => {
     }
     else{
         const friendInfo = await User.findByPk(friend)
-        console.log(userId)
-        console.log(friendInfo.id)
+        //console.log(userId)
+        //console.log(friendInfo.id)
         if(friendRequest1.requesterId === userId && friendRequest1.status === 'r'){
             return res.status(400).send({ error: "Already sent a request!"})
         }
@@ -85,7 +85,14 @@ const addFriend = async (req, res) => {
       error: 'Friend Id does not exist.'
     })
   }
+
+  if(error.name === 'SequelizeDatabaseError'){
+    return res.status(400).send({
+      error: 'Incorrect type for friend id'
+    })
+  }
   //all other errors
+  console.log(error)
   res.status(500).send({
     error: `Could not add friend. ${error}`
   })
@@ -97,24 +104,67 @@ const getUserFriendsList = async (req, res) => {
   try{
     const user = req.user
 
-    const query = await sequelize.query(`select f1.user1 as user, f2.user1 as friendId, u.name, u.email, count(*) as mutual_friends, f1.status
-    from friendslists f1 join
-    friendslists f2
-         on f1.user2 = f2.user2
-    inner join
-    users as u
-        on u.id = f2.user1
-    where f1.user1 = ${user.id} and f1.user1 != f2.user1 and 
-    group by f1.user1, f2.user1, u.name, u.email, f1.status;`, 
+    const query2 = await sequelize.query(`
+      select *
+      from friendslists f1 
+      inner join users as u
+        on u.id = f1.user2
+      where f1.user1 = ${user.id} and f1.status = 'a'
+      ;`, 
       {
         model: FriendsList,
         mapToModel: true
       })
 
-    res.status(200).send(query)
+      //console.log(query2)
+
+      const query = await sequelize.query(`
+        with friends as (
+          select *
+          from friendslists
+          where status = 'a'
+          order by user1 asc
+        )
+        select f1.user1 as user1, f2.user1 as user2, count(*) as num_in_common
+        from friends f1 join
+            friends f2
+            on f1.user2 = f2.user2
+        where f1.user1 = ${user.id} and f1.user1 != f2.user1 
+        group by f1.user1, f2.user1;
+      ;`, 
+      {
+        model: FriendsList,
+        mapToModel: true
+      })
+
+      let results = []
+      for(let i = 0; i < query2.length; i++){
+
+        const friendsInfo = {
+          friendId: query2[i].dataValues.user2,
+          name: query2[i].dataValues.name,
+          email: query2[i].dataValues.email,
+          status: query2[i].dataValues.status,
+          mutual_friends: 0
+        }
+
+        for(let j = 0; j < query.length; j++){
+          if(query2[i].dataValues.user2 === query[j].dataValues.user2){
+
+            //console.log(friendsInfo)
+
+            friendsInfo.mutual_friends = parseInt(query[j].dataValues.num_in_common)
+          }
+        }
+        results.push(friendsInfo)
+      }
+
+      //console.log(query)
+
+    res.status(200).send({results: results})
 
   }catch(error){
-    console.log(error)
+    //console.log(error)
 
     res.status(500).send({
         error: `Could not get friendslist ${error}`

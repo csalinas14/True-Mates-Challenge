@@ -1,5 +1,41 @@
 ﻿# True Mates Challenge
 
+## Requirement 3
+
+1. To first handle pagination, I created a GET route that is responsible for returning Posts regardless if pagination is included. The route can take query parameters called limit and offset. Limit represents the number of posts we are expecting from a singular page. Offset is the page number we are requesting. We calculate the pageOffset by multiplying these two values which tells us how many posts we should be skipping in our query. Using the sequelize method findAndCountAll allowed us to find the posts we are looking for by passing in limit and pageOffset and also returns a count of all posts.
+
+### *Errors*
+To handle when no query parameters mentioned above are included in the request, it will instead return a different sequelize query that will return all Posts and the total posts count. If one of limit or offset was missing, we included default values that would be passed in the original query. 
+
+
+Another error that was considered is if the query parameters were not numeric values. This was caught by sequelize with the 'SequelizeDatabaseError' and would return appropriate message. Any other unknown errors were handled with 500 status codes.
+
+2. 
+### *Database*
+In order for Users to be able to add friends, there were a few things to consider. The first step was to have the database support this new feature. My approach was to create a new table called Friendslist which would be a many to many relationship with Users to Users. Any new friendship added to the table would created two new entries where the userId and friendId were saved as user1 and user2 both ways. User1 and user2 columns had a foreign key relationship with the users table through the user table id. Two more columns were added as well which were called status and requester_id. Status represents if a friendship is the requested state known as 'r' or if its in the accepted state known as 'a'. Requester_id is a foreign key column with the user table's id and represents which of the two users sent the friend request. The purpose of these two columns is to implement a method of friend requests before accepting a friendship between two users. Then a migration was created to represent these changes. In the migration I also added an unique constraint on the user1 and user2 pair so we do not get duplicate entries.
+
+### *EndPoint*
+To add friends I created a new route for friendslist and a Post method to create a new friendship. This Post route uses the userExtractor middleware we created to check for Authorization and returns us the user's data, making this only possible for logged in users and throws an error if they are not. The request expects the friend's id in the body which it will use with the user's id to make two different query calls. Using sequelize's findOne method, it will first locate if there is a pending request between the two users. If there no entries for these two users then we create our first type of response which will create a friend request scenario between the two. This will create the two entries in the database with the 'r' status and setting requesterId to the user who sent this request. In the response we send a message showing this happened between the the two users.
+
+In the other successful response type, we look to return data when the other user finally accepts the request. We already have the two friendship entries from earlier where this time it was successful in finding the the pair. We  make sure it doesnt trigger any error cases and that the friend's id is matching with the requester_id this time. If these conditions are true then we change the pair of entries status to 'a' for accepted and return a message confirming that the friend request was accepted.
+
+### *Errors*
+A lot of errors can occur through the friend id that is provided. The first is if it even exists it will return an error.
+
+Throws an error if the friend id is matching the user id.
+
+Throws an error if the user already has sent out a friend request by checking if the requester_id is matching the user id and the status is 'r'.
+
+Throws an error if the friendship status is already 'a' meaning that these two users are already friends.
+
+Some sequelize related errors included if the unique constraint on the pair of values is triggered meaning that we tried to create duplicate values.
+
+Another is if we provide a friend Id that is numeric but the id is not in the database or we provide an incorrect type for friend id.
+
+3. First we created a new route in the friendslist route that will be a GET request to get the necessary info. This route uses the userExtractor middleware we created to check for Authorization and returns us the user's data, making this only possible for logged in users and throws an error if they are not.  The request works by first calling two queries utilizing sequelize's query method. One query is responsible for returning all the friends of the user and their information by joining the friends id to the user table. This query will also be important to consider friends who have zero mutual friends. The second query is responsible for returning the mutual friends count between the user and all their friends. The query creates a sub table where we only include friendships that have been accepted and then joins on itself through the friend id. In the case where a friend id has no matches with any other friends this will return no entries and return no count for mutual friends. Then we iterate through the results of the query, adding the right mutual_friends to its matching pair and providing a zero if its count does not exist. Not much for errors since we either get results from the query or not but we provided error catching for any unknown errors.
+
+
+
 ## Requirement 2
 
 1. In order to add an attribute to posts when created I first had to change the Post model to include an attribute column with string type. Then I created a new migration that adds the attribute column to the posts table.  I included attribute as part of the response body for the post creation request with error handling if not included. In order to consider prior posts to this change, I added a default value for those rows.

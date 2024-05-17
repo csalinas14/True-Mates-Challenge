@@ -171,8 +171,17 @@ const changePost = async (req, res) => {
 
 const getPaginationPosts = async (req, res) => {
   try{
-    const { limit, offset } = req.query
-    const pageOffset = limit*offset
+    let { limit, offset } = req.query
+    
+    if(!limit && !offset){
+      const query = await Post.findAndCountAll()
+      return res.status(200).send(query)
+    }
+    
+    if(!limit) limit = 10
+    if(!offset) offset = 0
+
+    let pageOffset = limit*offset
 
     const query = await Post.findAndCountAll({
       limit: limit,
@@ -180,7 +189,13 @@ const getPaginationPosts = async (req, res) => {
     })
     res.status(200).send(query)
   }catch(error){
-    res.status(400).json({error: error.message})
+    if(error.name === 'SequelizeDatabaseError'){
+      return res.status(400).send({
+        error: "Incorrect value for offset or limit. Please enter a numeric value"
+      })
+    }
+    
+    res.status(500).json({error: error.message})
   }
 }
 

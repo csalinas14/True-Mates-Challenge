@@ -36,7 +36,7 @@ const createPost = async (req, res) => {
         //Make the file public
         await bucket.file(req.file.originalname).makePublic()
       } catch(error) {
-        console.log(error)
+        
         return res.status(500).send({
           message: `Uploaded the file successfully: ${req.file.originalname}, but public access denied!`,
           url: publicUrl
@@ -59,7 +59,7 @@ const createPost = async (req, res) => {
 
     
   } catch(error) {
-    console.error(error)
+    
     if(error.code === 'LIMIT_UNEXPECTED_FILE'){
       return res.status(400).send({ message: "Too many files being uploaded"})
     }

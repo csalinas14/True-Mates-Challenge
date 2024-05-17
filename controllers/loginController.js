@@ -14,7 +14,7 @@ const login = async (req, res) => {
     const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.password)
 
     if(!(user && passwordCorrect)){
-      res.status(401).json({
+      return res.status(401).json({
         error: 'Invalid email or password'
       })
     }

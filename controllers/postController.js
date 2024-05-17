@@ -169,8 +169,24 @@ const changePost = async (req, res) => {
   }
 }
 
+const getPaginationPosts = async (req, res) => {
+  try{
+    const { limit, offset } = req.query
+    const pageOffset = limit*offset
+
+    const query = await Post.findAndCountAll({
+      limit: limit,
+      offset: pageOffset
+    })
+    res.status(200).send(query)
+  }catch(error){
+    res.status(400).json({error: error.message})
+  }
+}
+
 module.exports = {
   createPost,
   getPost,
-  changePost
+  changePost,
+  getPaginationPosts
 }

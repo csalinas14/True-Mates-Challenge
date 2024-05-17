@@ -33,10 +33,7 @@ module.exports = {
   },
   down: async ({ context: queryInterface }) => {
     await queryInterface.dropTable('photos')
-    await queryInterface.changeColumn('posts', 'photo', {
-      type: DataTypes.STRING,
-      allowNull: false,
-    })
+    
   }
 }
 

@@ -17,6 +17,7 @@ And the API results. Note: the first post id starts with three in this database 
 To handle when no query parameters mentioned above are included in the request, it will instead return a different sequelize query that will return all Posts and the total posts count. If one of limit or offset was missing, we included default values that would be passed in the original query. 
 
 Example of one query parameter missing. The default value for a missing offset is zero making this return the first two entries:
+
 ![pagination_query_missing](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/2c6f6230-7c93-4813-96b1-fb8821a80757)
 
 Another error that was considered is if the query parameters were not numeric values. This was caught by sequelize with the 'SequelizeDatabaseError' and would return appropriate message. Any other unknown errors were handled with 500 status codes.
@@ -30,25 +31,41 @@ In order for Users to be able to add friends, there were a few things to conside
 ### *EndPoint*
 To add friends I created a new route for friendslist and a Post method to create a new friendship. This Post route uses the userExtractor middleware we created to check for Authorization and returns us the user's data, making this only possible for logged in users and throws an error if they are not. The request expects the friend's id in the body which it will use with the user's id to make two different query calls. Using sequelize's findOne method, it will first locate if there is a pending request between the two users. If there are no entries for these two users then we create our first type of response which will create a friend request scenario between the two. This will create the two entries in the database with the 'r' status and setting requester id to the user who sent this request. In the response we send a message showing this happened between the the two users.
 
+Here our user FriendTester who is user 6 is sending a friend request to user Chris who has a user id of 7
+
+![add_friend_request](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/412d9c1d-dde4-45aa-8f2f-a0e59ea982ca)
 
 In the other successful response type, we look to return data when the other user finally accepts the request. We already have the two friendship entries from earlier where this time it was successful in finding the the pair. We  make sure it doesnt trigger any error cases and that the friend's id is matching with the requester_id this time. If these conditions are true then we change the pair of entries status to 'a' for accepted and return a message confirming that the friend request was accepted.
+
+Here Chris now sends his request to the same route and accepts the friend request.
+
+![add_friend_accept](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/bd1a09ef-b388-4b72-bf2e-12831b5702e1)
+
 
 ### *Errors*
 A lot of errors can occur through the friend id that is provided. The first is if it even exists it will return an error.
 
+![no_friend_id](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/f202ffee-614b-4f65-a6b6-e438af49d360)
+
 Throws an error if the friend id is matching the user id.
 
-Throws an error if the user already has sent out a friend request by checking if the requester_id is matching the user id and the status is 'r'.
+![same_friend](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/f71e78f3-0fe0-4a5d-b258-a8f98b06dec1)
 
-Throws an error if the friendship status is already 'a' meaning that these two users are already friends.
+Throws an error if the user already has sent out a friend request by checking if the requester_id is matching the user id and the status is 'r'. The first picture shows the request and the second shows the error.
 
-Some sequelize related errors included if the unique constraint on the pair of values is triggered meaning that we tried to create duplicate values.
+![request1](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/67c526b6-cc43-4949-b9fe-99375e178e19)
+![same_request](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/ed889103-8c56-41f7-b98f-24a3d4bce41c)
 
-Another is if we provide a friend Id that is numeric but the id is not in the database or we provide an incorrect type for friend id.
+Throws an error if the friendship status is already 'a' meaning that these two users are already friends. The picture shows us trying to befriend Chris again.
+
+![already_friends](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/9f3029ae-34be-440a-858c-9ebc6ac60e86)
+
+Another is if we provide a friend id that is numeric but the id is not in the database or we provide an incorrect type for friend id. Some sequelize related errors included if the unique constraint on the pair of values is triggered meaning that we tried to create duplicate values.
+
+![no_friend_id](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/55d0a0ee-02e7-4efd-87a9-4e47ee91be5d)
 
 ### *3.*
 First we created a new route in the friendslist route that will be a GET request to get the necessary info. This route uses the userExtractor middleware we created to check for Authorization and returns us the user's data, making this only possible for logged in users and throws an error if they are not.  The request works by first calling two queries utilizing sequelize's query method. One query is responsible for returning all the friends of the user and their information by joining the friends id to the user table. This query will also be important to consider friends who have zero mutual friends. The second query is responsible for returning the mutual friends count between the user and all their friends. The query creates a sub table where we only include friendships that have been accepted and then joins on itself through the friend id. In the case where a friend id has no matches with any other friends this will return no entries and return no count for mutual friends. Then we iterate through the results of the query, adding the right mutual_friends to its matching pair and providing a zero if its count does not exist. Not much for errors since we either get results from the query or not but we provided error catching for any unknown errors.
-
 
 
 ## Requirement 2

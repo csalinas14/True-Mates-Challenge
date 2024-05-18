@@ -7,7 +7,7 @@ const sequelize = new Sequelize('truemates', 'tester', 'carlostruemates', {
     dialect: 'postgres',
     host: DB_URL,
 })
-//const sequelize = new Sequelize(DB_URL)
+
 
 const migrationConf = {
     migrations: {
@@ -26,6 +26,12 @@ const runMigrations = async () => {
     })
 }
 
+const rollbackMigration = async () => {
+  await sequelize.authenticate()
+  const migrator = new Umzug(migrationConf)
+  await migrator.down()
+}
+
 const connectToDatabase = async () => {
     try{
         await sequelize.authenticate()
@@ -38,4 +44,4 @@ const connectToDatabase = async () => {
     return null
 }
 
-module.exports = {connectToDatabase, sequelize}
+module.exports = {connectToDatabase, sequelize, rollbackMigration}

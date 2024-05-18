@@ -1,8 +1,11 @@
 const router = require('express').Router()
 const { userExtractor } = require('../middleware/user')
-
-const { createPost } = require('../controllers/postController')
+const { createPost, getPost, changePost } = require('../controllers/postController')
 
 router.post("/", userExtractor, createPost)
+
+router.get("/:id", getPost)
+
+router.put("/:id", userExtractor, changePost)
 
 module.exports = router

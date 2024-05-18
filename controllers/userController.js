@@ -1,4 +1,3 @@
-//const { sendServerError, sendOkResponse } = require("../../core/responses")
 const bcrypt = require("bcrypt")
 const User = require("../models/user")
 
@@ -8,14 +7,14 @@ const createUser = async (req, res) => {
     if(!req.body.password){
       return res.status(400).json({error: "Please provide a password!"})
     }
-
+    
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(req.body.password, saltRounds)
     const user = await User.create({...req.body, password: passwordHash})
     
     res.json(user)
   } catch (error){
-    //console.log(error)
+
     if(error.name === 'SequelizeValidationError'){
       let errorMsgAry = []
       for(let i=0; i < error.errors.length; i++){
@@ -24,7 +23,7 @@ const createUser = async (req, res) => {
       const errorMsg = errorMsgAry.join(', ')
       return res.status(500).json({error: errorMsg})
     }
-    res.status(500).json({error: error.message})
+    res.status(400).json({error: error.message})
   }
 }
 

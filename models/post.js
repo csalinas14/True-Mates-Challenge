@@ -16,12 +16,17 @@ Post.init(
     },
     photo: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'users', key: 'id'}
+    },
+    attribute: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'Default'
     }
   },
   { 

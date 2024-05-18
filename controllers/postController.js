@@ -9,8 +9,7 @@ const bucket = storage.bucket("true-mates-bucket")
 const createPost = async (req, res) => {
   
   try{
-    //console.log(req.user.id)
-    
+
     await processFile(req, res)
 
     if(!req.file){
@@ -37,7 +36,7 @@ const createPost = async (req, res) => {
         //Make the file public
         await bucket.file(req.file.originalname).makePublic()
       } catch(error) {
-        console.log(error)
+        
         return res.status(500).send({
           message: `Uploaded the file successfully: ${req.file.originalname}, but public access denied!`,
           url: publicUrl
@@ -47,7 +46,7 @@ const createPost = async (req, res) => {
       if(!req.body.description){
         return res.status(400).send({ message: "Please include a description!"})
       }
-      console.log(req.user)
+      
       const post = await Post.create({description: req.body.description, photo: publicUrl, userId: req.user.id})
 
       res.status(200).send({
@@ -60,6 +59,11 @@ const createPost = async (req, res) => {
 
     
   } catch(error) {
+    
+    if(error.code === 'LIMIT_UNEXPECTED_FILE'){
+      return res.status(400).send({ message: "Too many files being uploaded"})
+    }
+
     res.status(500).send({
       message: `Could not upload the file: ${req.file.originalname}. ${error}`
     })

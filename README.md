@@ -137,4 +137,3 @@ We have errors that will throw when authorization fails and these are located in
 
 ![bad token](https://github.com/csalinas14/True-Mates-Challenge/assets/73559919/e20e59e1-266a-46c0-bd47-d6971d56f523)
 
-

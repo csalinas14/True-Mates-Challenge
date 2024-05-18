@@ -11,8 +11,7 @@ const bucket = storage.bucket("true-mates-bucket")
 const createPost = async (req, res) => {
   
   try{
-    //console.log(req.user.id)
-    
+
     await processFile(req, res)
 
     if(!req.body.description){
@@ -27,6 +26,7 @@ const createPost = async (req, res) => {
     let counter = 0
     let promises = []
     const post = await Post.create({description: req.body.description, userId: req.user.id, attribute: req.body.attribute})
+
 
     //process each photo to upload to GCP
     req.files.forEach(async (fil) => {
@@ -62,7 +62,7 @@ const createPost = async (req, res) => {
               //Make the file public
               await bucket.file(newFileName).makePublic()
             } catch(error) {
-              console.log(error)
+              
               return res.status(500).send({
                 message: `Uploaded the file successfully: ${newFileName}, but public access denied!`,
                 url: publicUrl
@@ -75,6 +75,7 @@ const createPost = async (req, res) => {
             
             resolve()
           
+
         })
         })
       )
@@ -190,6 +191,7 @@ const changePost = async (req, res) => {
       return res.status(400).send({
         message: 'Incorrect format for post id'
       })
+
     }
 
     res.status(500).send({
@@ -203,3 +205,4 @@ module.exports = {
   getPost,
   changePost
 }
+

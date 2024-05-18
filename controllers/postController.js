@@ -27,7 +27,6 @@ const createPost = async (req, res) => {
     let promises = []
     const post = await Post.create({description: req.body.description, userId: req.user.id, attribute: req.body.attribute})
 
-
     //process each photo to upload to GCP
     req.files.forEach(async (fil) => {
       const newFileName = 'user-' + req.user.id.toString() + '_' + fil.originalname
@@ -38,8 +37,6 @@ const createPost = async (req, res) => {
         resumable: false
       })
 
-      
-  
       blobStream.on("error", (err) => {
         res.status(500).send({ message: err.message })
       })
@@ -80,7 +77,6 @@ const createPost = async (req, res) => {
         })
       )
       
-    
   })
   await Promise.all(promises)
 
@@ -90,7 +86,7 @@ const createPost = async (req, res) => {
   })
     
   } catch(error) {
-    //console.log(error)
+    
     if(error.code === 'LIMIT_UNEXPECTED_FILE'){
       return res.status(400).send({
         message: "Too many files. Only 5 allowed."
@@ -153,7 +149,8 @@ const getPost = async(req, res) => {
       }
     })
 
-    res.status(200).send({post: post, created_ago: timeDiffToInclude, photos: photos})
+    res.status(200).send({post: post, created_ago: timeDiffToInclude,  photos: photos})
+
   }catch(error){
     res.status(400).send({
       message: 'Incorrect id'
@@ -183,26 +180,59 @@ const changePost = async (req, res) => {
         post_id: req.params.id
       }
     })
-
+    
     res.status(200).send({...post.dataValues, photos: photos})
   } catch(error){
-    //console.log(error)
+
     if(error.name === 'SequelizeDatabaseError'){
       return res.status(400).send({
         message: 'Incorrect format for post id'
       })
 
     }
-
+    
     res.status(500).send({
       message: 'Incorrect id'
     })
   }
 }
 
+const getPaginationPosts = async (req, res) => {
+  try{
+    let { limit, offset } = req.query
+    
+    if(!limit && !offset){
+      const query = await Post.findAndCountAll()
+      return res.status(200).send(query)
+    }
+    
+    if(!limit) limit = 10
+    if(!offset) offset = 0
+
+    let pageOffset = limit*offset
+
+    const query = await Post.findAndCountAll({
+      order: [
+        ['id', 'ASC']
+      ],
+      limit: limit,
+      offset: pageOffset
+    })
+    res.status(200).send(query)
+  }catch(error){
+    if(error.name === 'SequelizeDatabaseError'){
+      return res.status(400).send({
+        error: "Incorrect value for offset or limit. Please enter a numeric value"
+      })
+    }
+    
+    res.status(500).json({error: error.message})
+  }
+}
+
 module.exports = {
   createPost,
   getPost,
-  changePost
+  changePost,
+  getPaginationPosts
 }
-

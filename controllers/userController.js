@@ -3,7 +3,7 @@ const User = require("../models/user")
 
 const createUser = async (req, res) => {
   try{
-    
+
     if(!req.body.password){
       return res.status(400).json({error: "Please provide a password!"})
     }

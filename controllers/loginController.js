@@ -12,7 +12,7 @@ const login = async (req, res) => {
         error: 'Please provide email and password'
       })
     }
-    
+
     const user = await User.findOne({
       where: {
         email: email

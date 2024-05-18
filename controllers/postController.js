@@ -11,8 +11,7 @@ const bucket = storage.bucket("true-mates-bucket")
 const createPost = async (req, res) => {
   
   try{
-    //console.log(req.user.id)
-    
+
     await processFile(req, res)
 
     if(!req.body.description){
@@ -38,8 +37,6 @@ const createPost = async (req, res) => {
         resumable: false
       })
 
-      
-  
       blobStream.on("error", (err) => {
         res.status(500).send({ message: err.message })
       })
@@ -62,7 +59,7 @@ const createPost = async (req, res) => {
               //Make the file public
               await bucket.file(newFileName).makePublic()
             } catch(error) {
-              console.log(error)
+              
               return res.status(500).send({
                 message: `Uploaded the file successfully: ${newFileName}, but public access denied!`,
                 url: publicUrl
@@ -70,16 +67,16 @@ const createPost = async (req, res) => {
             }
             
             const photo = await Photo.create({postId: post.id, url: publicUrl})
-            //console.log(photo)
+            
             photoArray.push(photo)
-            //console.log(photoArray)
+            
             resolve()
           
+
         })
         })
       )
       
-    //blobStream.end(fil.buffer)
   })
   await Promise.all(promises)
 
@@ -89,9 +86,9 @@ const createPost = async (req, res) => {
   })
     
   } catch(error) {
-    //console.log(error)
+    
     if(error.code === 'LIMIT_UNEXPECTED_FILE'){
-      return res.status(500).send({
+      return res.status(400).send({
         message: "Too many files. Only 5 allowed."
       })
     }
@@ -101,7 +98,7 @@ const createPost = async (req, res) => {
         message: "One of your files was too large."
       })
     }
-    
+
     res.status(500).send({
       message: `Could not upload the files. ${error}`
     })
@@ -153,6 +150,7 @@ const getPost = async(req, res) => {
     })
 
     res.status(200).send({post: post, created_ago: timeDiffToInclude,  photos: photos})
+
   }catch(error){
     res.status(400).send({
       message: 'Incorrect id'
@@ -185,13 +183,15 @@ const changePost = async (req, res) => {
     
     res.status(200).send({...post.dataValues, photos: photos})
   } catch(error){
+
     if(error.name === 'SequelizeDatabaseError'){
       return res.status(400).send({
         message: 'Incorrect format for post id'
       })
+
     }
     
-    res.status(400).send({
+    res.status(500).send({
       message: 'Incorrect id'
     })
   }
